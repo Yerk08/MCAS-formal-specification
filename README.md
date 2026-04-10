@@ -4,7 +4,7 @@ This repository contains a TLA+ specification for **MCAS**. To verify the specif
 
 ## Prerequisites
 
-You need the TLA+ tools (specifically `tla2tools.jar`) installed on your system. You can download it from the [official TLA+ releases](https://github.com).
+You need the TLA+ tools (specifically `tla2tools.jar`) installed on your system. You can download it from the [official TLA+ releases](https://github.com/tlaplus/tlaplus/releases).
 
 ## File Structure
 
