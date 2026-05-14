@@ -244,7 +244,8 @@ OperationTerminates ==
             ~> (descState[d] = "IDLE")
 
 GlobalProgress ==
-    \E d \in Descriptors : descState[d] = "ACTIVE" ~> (descState[d] = "SUCCESS" \/ ~FreeStructConstraint)
+    \E d \in Descriptors : descState[d] = "ACTIVE" ~>
+        \E u \in Descriptors : descState[u] = "SUCCESS" \/ ~FreeStructConstraint
 
 (*******************************************)
 (* NEXT STATE RELATION & SPECIFICATION     *)
