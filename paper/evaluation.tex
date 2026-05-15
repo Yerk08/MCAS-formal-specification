@@ -1,10 +1,8 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-\begin{BLACKSHEET}
+The evaluation demonstrates that after adapting the frame-replacement operations into generalized transactions, the framework remains correct, satisfying both linearizability and lock-freedom, with the latter expressed via the \texttt{GlobalProgress} property. Verification was conducted using exhaustive state-space exploration under our pre-defined execution constraints.
 
-\textbf{Need to write the part with description of specification and evaluation results}
+Since the execution of all data structure methods is ultimately decomposed into phases that can overlap, verification using two concurrent threads is sufficient. This setup confirms that any execution path under arbitrary instruction interleaving remains correct. Introducing a third thread merely adds a phase that overlaps with the other two in the exact same manner as they do with each other.
 
-Since the execution of all data structure methods is ultimately decomposed into phases that can overlap, verification using two concurrent threads is sufficient. This setup confirms that any execution path under arbitrary instruction interleaving remains correct. Introducing a third thread merely adds a phase that overlaps with the other two in the exact same manner as they do with each other. Because execution is fully deterministic based on the descriptor at any given point, verifying the system with more than a pair of workers is unnecessary. Moreover, a larger number of threads exponentially expands the state space, making exhaustive exploration by the TLC model checker computationally prohibitive; thus, we opted to limit the configuration to two threads. Similarly, to verify whether the framework can handle overlapping frame sections correctly, a memory pool of two cells is fully sufficient.
-
-\end{BLACKSHEET}
+A larger number of threads exponentially expands the state space, making exhaustive exploration by the TLC model checker computationally prohibitive; thus, we opted to limit the configuration to two writing threads and single reading one. Similarly, to verify whether the framework can handle overlapping frame sections correctly, a memory pool of two cells is fully sufficient. The same reasoning applies to the tree module.

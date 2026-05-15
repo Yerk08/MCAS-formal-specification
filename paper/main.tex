@@ -3,14 +3,6 @@
 \usepackage{cite}
 \usepackage{amsmath,amssymb}
 
-% !!! COMPLETELY TEMPORAL !!! PLEASE DELETE THIS ENVIRONMENT IN REAL PAPER !!! COMPLETELY TEMPORAL !!!
-\newenvironment{BLACKSHEET}{}{}
-\usepackage{draftwatermark}
-\SetWatermarkText{DRAFT}
-\SetWatermarkScale{1}
-\SetWatermarkColor[gray]{0.7} % Цвет (0.9 — очень светлый, 0 — черный)
-% !!! COMPLETELY TEMPORAL !!! PLEASE DELETE THIS ENVIRONMENT IN REAL PAPER !!! COMPLETELY TEMPORAL !!!
-
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
@@ -29,6 +21,8 @@
 \usepackage{color}
 \definecolor{boxshade}{gray}{0.85}
 \setboolean{shading}{true}
+\usepackage{tikz}
+\usepackage{adjustbox}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     \kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -66,7 +60,5 @@ concurrent data structures, TLA+, formal verification, non-blocking algorithms, 
 \input{conclusion.tex}
 
 \input{bibliography.tex}
-
-\input{appendix.tex}
 
 \end{document}

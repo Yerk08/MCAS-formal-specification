@@ -1,21 +1,127 @@
 \section{Formal Methodology}
 \label{sec:formal_methodology}
 
-\begin{BLACKSHEET}
+To verify the MCAS algorithm, we developed a formal specification in TLA+ suitable for the TLC model checker. Core memory is tracked via \texttt{nodeValue} and \texttt{nodeDesc}, which map nodes to their current values and assigned write descriptors. First and further, \texttt{freeWDescs}, \texttt{freeRDescs}, and \texttt{successCount} manage resource allocation and metrics, while \texttt{absNodeValue} provides a refinement mapping to verify linearizability against an ideal atomic memory.
 
-To verify the MCAS algorithm, we developed a formal specification in TLA+ suitable for the TLC model checker. The model abstracts the system into a state machine where the shared memory mem is represented as a record containing two fields: mem.val, storing the current integer value, and mem.owner, which holds either a NULL value or the ID of the thread currently holding an exclusive lock on the cell. To capture asynchronous execution, each thread t is modeled with its own control state (pc[t]), an announcement flag (announce), and a transaction status (status) indicating whether its operations are Undecided, Committed, or Aborted.
+To maintain a finite state space during model checking, we enforce an execution boundary via the constraint \texttt{countConstraint == successCount <= 3}. Furthermore, since the foundational algorithmic primitives remain structurally unchanged, we employ an identical to \texttt{TreeCAS} module global progress property to verify liveness (and consider on lock-freedom).
 
-\textbf{Need to write the part with description of specification for other fields}
-A. Writer Lifecycle: Acquisition and Atomic Commit
-....
-\textbf{Need to write the part with description of specification for the writer}
-B. Reader Lifecycle: Announcement and Validation
-....
-\textbf{Need to write the part with description of specification for the reader}
-C. Formal Verification and Correctness We verify the MCAS model as a state-transition system using the TLA+ framework. The safety of the algorithm is established through the following invariants:
-Safety Invariant (linearisability...):
-System Progress (lock-free...):
-\textbf{Need to write the part with description of verification}
-....
+\subsection{Writer Lifecycle: Acquisition and Atomic Commit}
 
-\end{BLACKSHEET}
+Write transaction states are managed by \texttt{wDescState}, \texttt{wDescPending}, \texttt{wDescFrame}, \texttt{wDescOldValue}, and \texttt{wDescNewValue}, capturing descriptor lifecycles, unacquired cells, locked frames, and value snapshots. Parallel writer actions are structured into seven distinct phases.
+
+The execution begins with initialization, which allocates a unique write descriptor for the active transaction, followed by the acquiring phase to sequentially link and acquire target frame cells. Next, the reader eviction phase broadcasts the \texttt{SCANNING} state to reject ongoing stalled readers before values shift. The transaction then enters the decision phase to reach the logical commit boundary, making target values ready for physical memory persistence. Finally, the reclamation phase performs a lazy cleanup and releases the descriptor. Subsequentually, a cooperative help operation can execute at any phase to assist conflicting descriptors; this step is optional for basic specification safety but strictly required to ensure lock-freedom.
+
+It is worth noting that the difference between these two specifications lies in the extensions introduced in the preceding sections. Therefore, the core components remain valid, with the only modification being the elimination of node-structure indirection.
+
+\subsection{Reader Lifecycle: Announcement and Validation}
+
+Read operations utilize an announce array represented by \texttt{rDescState}, \texttt{rDescFrame}, and \texttt{rDescView} to track reader status, target frames, and local snapshots. Reader actions are structured into four phases.
+
+The process begins with allocation, which initializes the read descriptor with a target frame, followed by the announcement phase to publish the operation to the announce array (which implemented as \texttt{ANNOUNCED} state). This step allows writers to reject conflicting reads. Next, the scan phase reads memory cells.
+
+\subsection{Formal Verification and Correctness}
+
+The correctness of the state-transition system is rigorously checked using two primary safety invariants that enforce linearizability across concurrent phases:
+\begin{itemize}
+    \item \texttt{AtomicyInvariant}: This invariant ensures the global memory consistency between the physical and abstract states. If a memory cell is not held by any descriptor (\texttt{NULL}), its physical value (\texttt{nodeValue}) must perfectly align with the ideal atomic representation (\texttt{absNodeValue}). When a cell is owned by an active descriptor, its value must match the abstract state if the transaction is \texttt{ACTIVE} or \texttt{ABORTED}. If the transaction progresses to the \texttt{SCANNING} or \texttt{SUCCESS} phases—where the abstract state has already linearized—the physical memory is allowed to retaining its original \texttt{wDescOldValue} or completely match the newly updated abstract state.
+
+    \item \texttt{ReaderAtomicy}: This invariant validates snapshot consistency for reading operations. Evaluated exclusively after a reader transitions to the \texttt{READING} state, it guarantees that for every node within its target frame, the collected local view (\texttt{rDescView}) remains linearizable. Specifically, the observed value must either correspond to the current globally valid abstract memory state or match a historical snapshot (\texttt{wDescOldValue}) from a concurrently committed successful transaction that intersected with the reader's frame.
+\end{itemize}
+
+An crucial observation is that descriptors are assigned exclusively in ascending order to prevent deadlocks, mirroring the strategy used in the \texttt{TreeCAS} module:
+
+\begin{tla}
+(* 2) AcquireNode: CAS-based cell ordering with descriptors *)
+/\ n = (CHOOSE minNode \in wDescPending[d] :
+    \A anyNode \in wDescPending[d] : minNode <= anyNode)
+\end{tla}
+\begin{tlatex}
+\@x{}%
+\@y{%
+  2) AcquireNode: CAS-based cell ordering with descriptors 
+}%
+\@xx{}%
+\@x{ \.{\land} n \.{=} ( {\CHOOSE} minNode \.{\in} wDescPending [ d ] \.{:}}%
+ \@x{\@s{4.1} \A\, anyNode \.{\in} wDescPending [ d ] \.{:} minNode \.{\leq}
+ anyNode )}%
+\end{tlatex}
+
+Furthermore, the presented algorithm is theoretically designed to never produce aborted transactions under the verification configuration. Although it maintains full support for aborts if required by the top-level algorithm using the framework. The alternative implementation below violates the lock-freedom property:
+
+\begin{tla}
+------------- MODULE AcquireNode(d, n) ------------
+/\ IF nodeValue[n] /= wDescOldValue[d][n]
+THEN (* CAS failed: abort the transaction and *)
+/\ wDescState' = [wDescState EXCEPT ![d] = "ABORTED"]
+     (* restore the pending frame *)
+/\ wDescPending' = [wDescPending EXCEPT ![d] = wDescFrame[d]]
+/\ UNCHANGED (*...*)
+===================================================
+\end{tla}
+\begin{tlatex}
+ \@x{}\moduleLeftDash\@xx{ {\MODULE} AcquireNode ( d ,\, n
+ )}\moduleRightDash\@xx{}%
+\@x{ \.{\land} {\IF} nodeValue [ n ] \.{\neq} wDescOldValue [ d ] [ n ]}%
+\@x{ \.{\THEN}}%
+\@y{%
+  CAS failed: abort the transaction and 
+}%
+\@xx{}%
+ \@x{ \.{\land} wDescState \.{'} \.{=} [ wDescState {\EXCEPT} {\bang} [ d ]
+ \.{=}\@w{ABORTED} ]}%
+\@x{\@s{8.2}}%
+\@y{%
+  restore the pending frame 
+}%
+\@xx{}%
+ \@x{ \.{\land} wDescPending \.{'} \.{=} [ wDescPending {\EXCEPT} {\bang} [ d
+ ] \.{=} wDescFrame [ d ] ]}%
+\@x{ \.{\land} {\UNCHANGED}}%
+\@y{%
+ ...
+}%
+\@xx{}%
+\@x{}\bottombar\@xx{}%
+\end{tlatex}
+
+The \texttt{WriterScanAndReject} function (Phase 4) encapsulates both the abortion of conflicting read operations and the logical linearization point. It is implemented as follows:
+
+\begin{tla}
+---------- MODULE WriterScanAndReject(d) ----------
+LET conflictingReaders == {r \in RDescriptors :
+    rDescState[r] \in {"ANNOUNCED", "READING"} /\
+    (rDescFrame[r] \cap wDescFrame[d]) /= {}} IN
+/\ absNodeValue' = [n \in Nodes |->
+    IF n \in wDescFrame[d]
+    THEN wDescNewValue[d][n]
+    ELSE absNodeValue[n]]
+/\ IF conflictingReaders /= {}
+    THEN rDescState' = [r \in RDescriptors |->
+        IF r \in conflictingReaders
+        THEN "REJECTED"
+        ELSE rDescState[r]]
+    ELSE UNCHANGED rDescState
+===================================================
+\end{tla}
+\begin{tlatex}
+ \@x{}\moduleLeftDash\@xx{ {\MODULE} WriterScanAndReject ( d
+ )}\moduleRightDash\@xx{}%
+\@x{ \.{\LET} conflictingReaders \.{\defeq} \{ r \.{\in} RDescriptors \.{:}}%
+\@x{ rDescState [ r ] \.{\in} \{\@w{ANNOUNCED} ,\,\@w{READING} \} \.{\land}}%
+ \@x{ ( rDescFrame [ r ] \.{\cap} wDescFrame [ d ] ) \.{\neq} \{ \} \}
+ \.{\IN}}%
+\@x{ \.{\land} absNodeValue \.{'} \.{=} [ n \.{\in} Nodes \.{\mapsto}}%
+\@x{\@s{4.1} {\IF} n \.{\in} wDescFrame [ d ]}%
+\@x{\@s{4.1} \.{\THEN} wDescNewValue [ d ] [ n ]}%
+\@x{\@s{4.1} \.{\ELSE} absNodeValue [ n ] ]}%
+\@x{ \.{\land} {\IF} conflictingReaders \.{\neq} \{ \}}%
+ \@x{\@s{4.1} \.{\THEN} rDescState \.{'} \.{=} [ r \.{\in} RDescriptors
+ \.{\mapsto}}%
+\@x{\@s{20.5} {\IF} r \.{\in} conflictingReaders}%
+\@x{\@s{20.5} \.{\THEN}\@w{REJECTED}}%
+\@x{\@s{20.5} \.{\ELSE} rDescState [ r ] ]}%
+\@x{\@s{4.1} \.{\ELSE} {\UNCHANGED} rDescState}%
+\@x{}\bottombar\@xx{}%
+\end{tlatex}
+
+The complete specifications for both modules are available on GitHub, with the corresponding repository link provided in Section~\ref{sec:conclusion}.
