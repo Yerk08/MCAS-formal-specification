@@ -98,6 +98,7 @@ AbsAtomicWrite(frame, valuesMap) ==
 (* 1) CreateWDescriptor: Initializes a write operation on an arbitrary cell frame *)
 CreateWDescriptor(d, frame, valuesMap) ==
     /\ d \in freeWDescs
+    /\ \A e \in freeWDescs: d <= e (* Optimization point, because states are identical *)
     /\ frame \in SUBSET Nodes /\ frame /= {}
     (* valuesMap defines the target update values for each cell in the frame *)
     /\ valuesMap \in [frame -> {0, 1}]
@@ -208,6 +209,7 @@ Help(d, n) ==
 (* 1) CreateRDescriptor: Initializes a read operation on a target cell frame *)
 CreateRDescriptor(r, frame) ==
     /\ r \in freeRDescs
+    /\ \A e \in freeRDescs: r <= e (* Optimization point, because states are identical *)
     /\ frame \in SUBSET Nodes /\ frame /= {}
     /\ freeRDescs' = freeRDescs \ {r}
     /\ rDescFrame' = [rDescFrame EXCEPT ![r] = frame]

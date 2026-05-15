@@ -71,7 +71,7 @@ Init ==
     (* Construct a small tree where 0 is the root and 1 is the child *)
     /\ nodeStruct = [n \in Nodes |-> n]
     (* Initialize structLinks as a finite lazy array *)
-    /\ LET InitialTree == [s \in {0, 1} |-> IF s = 0 THEN {1} ELSE {}]
+    /\ LET InitialTree == [s \in Nodes |-> IF s = 0 THEN {1} ELSE {}]
            Domain == DOMAIN InitialTree
        IN
        /\ freeStruct = (CHOOSE x \in Domain : \A y \in Domain : x >= y) + 1
@@ -119,6 +119,7 @@ CreateDescriptor(d, frame, linksMap) ==
         allocatedIndices == freeStruct..(freeStruct + count - 1)
     IN
     /\ d \in freeDescs
+    /\ \A e \in freeDescs: d <= e (* Optimization point, because states are identical *)
     /\ IsValidFrame(frame)
     /\ \A n \in frame : linksMap[n] = structLinks[nodeStruct[n]]
     (* Ensure all allocated indices fall within the valid Nat set *)
