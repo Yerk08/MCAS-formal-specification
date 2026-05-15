@@ -1,0 +1,16 @@
+\section{Introduction}
+\label{sec:intro}
+
+\begin{BLACKSHEET}
+
+In recent decades, numerous concurrency approaches have been developed to provide high throughput with minimal system overhead. One desired example is the framework by J. Tsay and H. Lee \cite{TsayLee}, along with its adaptation for red-black trees by A. Natarajan and N. Mittal \cite{LockFreeBST}. The core principle of this framework is to bring lock-free properties to binary search trees. This guarantees that at least one thread will always complete its execution in a finite number of steps. To achieve this, Natarajan and Mittal introduced a descriptor-based approach that ensures the structural consistency of the data.
+
+In this paper, we propose a generalization of these approaches to build a Software Transactional Memory (STM) framework. Transactional memory enables non-blocking operations, which increases throughput and reduces the latency typical for traditional locking protocols. Crucially, system consistency is maintained. Furthermore, this approach introduces key advantages, such as support for nested transactions, which have no direct equivalent in lock-based systems.
+
+The core mechanism of an STM framework relies on executing transactions, which are independent operations performed simultaneously on data. During execution, threads create local copies of the data they modify. These changes are later committed to global memory in a way that prevents interference. If a conflict occurs, the unsuccessful transactions are aborted.
+
+Universal algorithms, derived through the transformation and generalization of specialized approaches, remain highly functional and correct. The primary objective of this work is to demonstrate how formal specifications can validate this assertion, specifically for STM and the Tsay-Lee framework. To work with these mathematical descriptions, we propose utilizing the TLA+ specification language.
+
+TLA+ (Temporal Logic of Actions) \cite{LamportTLA} is a formal specification language developed by Leslie Lamport for modeling concurrent and distributed systems. It enables a system to be described as a state machine, allowing its safety and liveness invariants to be verified through exhaustive state space exploration. Using TLA+ as a "tool for thinking" is a well-established practice among engineers due to its rigorous verifiability. Consequently, it was chosen to specify the generalized algorithm resulting from our transformation, thereby confirming its correctness and robustness under high contention.
+
+\end{BLACKSHEET}

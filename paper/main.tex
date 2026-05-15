@@ -1,0 +1,72 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+
+% !!! COMPLETELY TEMPORAL !!! PLEASE DELETE THIS ENVIRONMENT IN REAL PAPER !!! COMPLETELY TEMPORAL !!!
+\newenvironment{BLACKSHEET}{}{}
+\usepackage{draftwatermark}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{1}
+\SetWatermarkColor[gray]{0.7} % Цвет (0.9 — очень светлый, 0 — черный)
+% !!! COMPLETELY TEMPORAL !!! PLEASE DELETE THIS ENVIRONMENT IN REAL PAPER !!! COMPLETELY TEMPORAL !!!
+
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{flushend}
+
+\let\implies\undefined
+\usepackage{tlatex}
+\usepackage{color}
+\definecolor{boxshade}{gray}{0.85}
+\setboolean{shading}{true}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    \kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Using TLA+ as a Tool for Building Transactional Memory Models from Specialized Frameworks}
+\author{\IEEEauthorblockN{Yeremey Pervunetskikh}
+\IEEEauthorblockA{Fac. of Computer Science \\
+HSE University \\
+Pokrovsky Blvd, 11, 109028, Moscow, Russia \\
+Email: eremejperv@gmail.com}}
+\maketitle
+
+\input{abstract.tex}
+
+\begin{IEEEkeywords}
+concurrent data structures, TLA+, formal verification, non-blocking algorithms, binary search trees, transactional memory.
+\end{IEEEkeywords}
+
+\input{introduction.tex}
+
+\input{related_works.tex}
+
+\input{advanced_tsay_lee_framework.tex}
+
+\input{adaptation_to_transactional_memory.tex}
+
+\input{strategy_for_reading_model.tex}
+
+\input{formal_methodology.tex}
+
+\input{evaluation.tex}
+
+\input{conclusion.tex}
+
+\input{bibliography.tex}
+
+\input{appendix.tex}
+
+\end{document}

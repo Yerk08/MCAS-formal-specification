@@ -1,0 +1,21 @@
+\section{Formal Methodology}
+\label{sec:formal_methodology}
+
+\begin{BLACKSHEET}
+
+To verify the MCAS algorithm, we developed a formal specification in TLA+ suitable for the TLC model checker. The model abstracts the system into a state machine where the shared memory mem is represented as a record containing two fields: mem.val, storing the current integer value, and mem.owner, which holds either a NULL value or the ID of the thread currently holding an exclusive lock on the cell. To capture asynchronous execution, each thread t is modeled with its own control state (pc[t]), an announcement flag (announce), and a transaction status (status) indicating whether its operations are Undecided, Committed, or Aborted.
+
+\textbf{Need to write the part with description of specification for other fields}
+A. Writer Lifecycle: Acquisition and Atomic Commit
+....
+\textbf{Need to write the part with description of specification for the writer}
+B. Reader Lifecycle: Announcement and Validation
+....
+\textbf{Need to write the part with description of specification for the reader}
+C. Formal Verification and Correctness We verify the MCAS model as a state-transition system using the TLA+ framework. The safety of the algorithm is established through the following invariants:
+Safety Invariant (linearisability...):
+System Progress (lock-free...):
+\textbf{Need to write the part with description of verification}
+....
+
+\end{BLACKSHEET}

@@ -1,0 +1,86 @@
+\section{Advanced Tsay-Lee Framework}
+\label{sec:advanced_tsay_lee_framework}
+
+\begin{BLACKSHEET}
+
+The work of Tsay and Lee \cite{TsayLee} was developed to ensure that even complex data structures like binary search trees could support lock-free properties while remaining linearizable. Simpler structures, such as linked lists, do not require such complexity; for instance, Heller et al. \cite{LockFreeList} achieved this by utilizing logical deletion. Our goal is to guarantee that at least one thread will infinitely often complete its data structure method execution. At the same time, we require these methods to be representable as atomic operations, preserving all partial execution orders. To achieve this, a frame-based approach was proposed. In this context, a frame is defined as a subtree section that originates at a specific node and is bounded below by a set of terminal nodes. The frame size corresponds to the number of elements it contains, encompassing all edges connecting the constituent nodes of the original tree. A frame is selected such that its complete atomic replacement preserves the internal invariants of the underlying data structure.
+
+The framework partitions the nodes accessed by each data structure operation into such frames. For example, to insert a node into the tree, the algorithm clones a frame that originates at the root node. This frame encompasses several additional nodes required to guide the insertion operation as it traverses down the data structure. Subsequently, the target operation is either performed on these nodes or they remain unchanged; the frame is then atomically replaced, provided that no other concurrent thread has modified this specific set of nodes and edges. If a concurrent modification is detected, the transformation process is retried from scratch. Otherwise, as the operation traverses deeper, a new frame is allocated. This new frame is guaranteed to overlap with the previous one, ensuring that when it is replaced by its local copy, the nodes maintain their connectivity to the root and remain continuously accessible.
+
+This implementation was designed for the DEC Alpha architecture \cite{SitesDECAlpha}, which allowed verification of whether another thread had modified a memory element. This capability is equivalent to executing multiple atomic load-linked/store-conditional (LL/SC) instructions. Modern computer architectures, however, lack such primitives; instead, the compare-and-swap (CAS) atomic operation is predominantly used. CAS accepts three arguments: the memory location to be updated, the expected value, and the desired new value. It possesses an infinite consensus number \cite{WaitFreeSync}, enabling non-blocking synchronization for an arbitrary number of threads. If a thread fails to update the value due to a mismatch with the expected value, CAS returns false and no replacement occurs; otherwise, the function returns true.
+
+Based on these operations, Natarajan et al. \cite{WaitFreeBST} proposed decomposing vertices and their subtrees into distinct, interconnected nodes. Under this approach, to atomically replace a frame with its local copy, a CAS operation needs to be executed only on the single vertex from which all other vertices in that subtree section are reachable. This unique vertex serves as the root of the frame. If the CAS on the root fails, it implies that another concurrent thread has modified it first, requiring the current thread to either retry the execution or raise an error.
+
+However, this approach introduces a critical problem previously noted by the framework's authors: if a concurrent thread modifies our frame by executing a CAS on an internal node rather than the root, data structure consistency can be compromised. Such an operation cannot detect the root-level CAS that replaced the entire frame. Consequently, the concurrent thread becomes disconnected from the main tree root because the nodes it was operating on are permanently removed from the active topology, having been replaced by our local frame copy. To prevent this inconsistency, method descriptors were introduced. To execute an operation, a thread creates a descriptor encapsulating its current data structure operation. Subsequently, a reference to this descriptor is attached to all nodes involved in the operation. If another thread attempts to access a marked node, it must first inspect the descriptor and help the original thread complete its execution. This helping mechanism must be applied recursively if executing the helping operation requires assisting a third operation, and so on. This helping mechanism, akin to the multi-word CAS approach by Ellen et al. \cite{NonBlockBST}, ensures both system-wide progress and strict linearizability \cite{Linearizability} during concurrent modifications.
+
+We formalize this frame-based update in TLA+ to ensure its correctness. The \texttt{TreeCAS} module is modeled around a minimal tree consisting of a root and its child leaf. This structure is sufficient to verify the framework's correctness, as the critical race condition to evaluate involves a larger frame overlapping a smaller one (furthermore, scaling the state space to include more nodes does not break the framework, as confirmed by our larger-scale model checking runs). To model the allocation of new nodes, we utilize an infinite memory pool constrained by a state-space filter limiting the maximum number of active allocated cells to six. The overall algorithm comprises five distinct phases, with the third phase implementing the recursive helping mechanism. This phase is structured as follows:
+
+\begin{tla}
+(* Cooperatively advance for descriptor if it blocks our path *)
+Help(d, n) == LET otherD == nodeDesc[n] IN
+    /\ descState[d] = "ACTIVE" (* We can only offer help if *)
+    /\ n \in descPending[d]    (* we are actively trying to acquire nodes *)
+    /\ nodeDesc[n] /= NULL (* The target node must be currently *)
+    /\ nodeDesc[n] /= d    (* locked by a different descriptor otherD *)
+    /\ IF descState[otherD] \in {"ACTIVE", "COMMITTING"}
+       THEN CommitStep(otherD)
+       ELSE IF descState[otherD] \in {"SUCCESS", "ABORTED"}
+       THEN ReleaseDescriptor(otherD)
+       ELSE UNCHANGED vars
+\end{tla}
+\begin{tlatex}
+\@x{}%
+\@y{%
+  Cooperatively advance for descriptor if it blocks our path 
+}%
+\@xx{}%
+ \@x{ Help ( d ,\, n ) \.{\defeq} \.{\LET} otherD \.{\defeq} nodeDesc [ n ]
+ \.{\IN}}%
+\@x{ \.{\land} descState [ d ] \.{=}\@w{ACTIVE}}%
+\@y{%
+  We can only offer help if 
+}%
+\@xx{}%
+\@x{ \.{\land} n \.{\in} descPending [ d ]}%
+\@y{%
+  we are actively trying to acquire nodes 
+}%
+\@xx{}%
+\@x{ \.{\land} nodeDesc [ n ] \.{\neq} NULL}%
+\@y{%
+  The target node must be currently 
+}%
+\@xx{}%
+\@x{ \.{\land} nodeDesc [ n ] \.{\neq} d}%
+\@y{%
+  locked by a different descriptor otherD 
+}%
+\@xx{}%
+ \@x{ \.{\land} {\IF} descState [ otherD ] \.{\in} \{\@w{ACTIVE}
+ ,\,\@w{COMMITTING} \}}%
+\@x{ \.{\THEN} CommitStep ( otherD )}%
+ \@x{ \.{\ELSE} {\IF} descState [ otherD ] \.{\in} \{\@w{SUCCESS}
+ ,\,\@w{ABORTED} \}}%
+\@x{ \.{\THEN} ReleaseDescriptor ( otherD )}%
+\@x{ \.{\ELSE} {\UNCHANGED} vars}%
+\end{tlatex}
+
+As demonstrated here, we do not distinguish between the concept of an execution thread and the descriptor of the operation it performs. This abstraction can be interpreted as the use of coroutines within the physical production code, a pattern that is highly prevalent in practice. An interesting aspect of constructing formal specifications for non-blocking algorithms is that the \texttt{Help(d, n)} routine is only strictly necessary in the actual implementation. While omitting it compromises the global progress property, it is not mathematically required to maintain safety invariants.
+
+\begin{tla}
+GlobalProgress ==
+    \E d \in Descs : descState[d] = "ACTIVE" ~>
+        \E u \in Descs : descState[u] = "SUCCESS"
+            \/ ~FreeStructConstraint
+\end{tla}
+\begin{tlatex}
+\@x{ GlobalProgress \.{\defeq}}%
+ \@x{\@s{16.4} \E\, d \.{\in} Descs \.{:} descState [ d ] \.{=}\@w{ACTIVE}
+ \.{\leadsto}}%
+\@x{\@s{20.5} \E\, u \.{\in} Descs \.{:} descState [ u ] \.{=}\@w{SUCCESS}}%
+\@x{\@s{24.6} \.{\lor} {\lnot} FreeStructConstraint}%
+\end{tlatex}
+
+To verify linearizability, we enforced the preservation of the tree topology invariant, ensuring that every node remains continuously reachable from the root and is never erroneously obscured by a concurrent transaction.
+
+\end{BLACKSHEET}

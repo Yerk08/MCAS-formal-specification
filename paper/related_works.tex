@@ -1,0 +1,12 @@
+\section{Related Works}
+\label{sec:related_works}
+
+\begin{BLACKSHEET}
+
+The protocol for software transactional memory presented here was originally described in the early work of Shavit and Touitou \cite{STM} and subsequently optimized by Guerraoui et al. \cite{EfficientMCAS}. Our primary focus is to formally verify this protocol and demonstrate that it can be derived from lock-free frameworks without needing generalization to the broader concept of STM. While the original specifications in the aforementioned frameworks are presented as textual descriptions with theorem-based proofs, this approach—though straightforward to implement—can introduce verification challenges. To address this, we propose using TLA+ to provide a rigorous, mathematical validation of these assertions.
+
+Alternative STM frameworks exist, such as those by Ennals \cite{EnnalsLockBased} and Harris \cite{HarrisJavaSTM}, which rely on locking when operations conflict. In these systems, memory writes are performed by temporarily locking the target memory region, writing the values directly, and recording them in an undo log. Other strategies involve acquiring locks during the commit phase, restricting locking to that specific window. In contrast, our objective is to eliminate blocking operations entirely, allowing threads to operate independently. This independence is largely facilitated by a helping mechanism \cite{WaitFreeSync}, a technique widely adopted across numerous non-blocking algorithms.
+
+Furthermore, the described mechanism does not inherently support nested transactions \cite{ComposableMT}. Introducing nesting requires generalizing the concept of a "memory cell" within the global set. As detailed below, nodes can store references to operation descriptors that encapsulate their internal execution states. However, in nested transactions, recursive helping mechanisms can cause a thread to attempt to help itself on the same set of data. To bypass this issue, one can employ references to other descriptors within the local states of existing descriptors. Although this approach is highly complex to implement, the finite nesting depth ensures it remains non-blocking and linearizable, much like the base algorithm. This holds true because double references cannot be processed alongside standard references within the same execution phase. Nevertheless, evaluating this specific extension falls outside the scope of this paper; thus, its detailed verification is not presented in this work.
+
+\end{BLACKSHEET}

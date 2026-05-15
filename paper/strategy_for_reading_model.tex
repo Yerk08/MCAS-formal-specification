@@ -1,0 +1,18 @@
+\subsection{Strategy For Reading Model}
+\label{sec:strategy_for_reading_model}
+
+\begin{BLACKSHEET}
+
+Shifting to a ``lightweight'' reading model requires a more aggressive strategy for tracking concurrent dependencies. While a similar concept has been introduced in the context of the Linux kernel's Read-Copy Update mechanism \cite{RCULinux}, we emphasize its application here beyond search trees, extending it directly to transactional memory frameworks. We introduce an \textit{announce array}, where each reader thread registers its presence before executing an operation. Every writing operation must inspect this array during the atomic replacement of its cell list, subsequently aborting any reader threads that are operating on vertices within that list. This validation step must occur strictly before the atomic replacement is finalized; otherwise, by the end of the check, a reader thread might complete its execution without noticing that its operation should have been aborted due to updates to the values it previously read.
+
+Since a write operation engaged in aborting concurrent readers cannot be aborted itself, the new list of cell values intended for the atomic replacement is guaranteed to be globally valid for the entire data structure. Consequently, an incoming read operation must first register itself in the announce array before determining the current value of each target vertex. This value is either stored directly in the cell or contained within the descriptor referenced by that cell. The reader thread must retrieve this value or, if a write operation has already staged a new value, fetch the pending new value that is ready for installation. After completing its execution validly, the reader thread simply unregisters itself from the announce array to release its claim.
+
+The safety of this optimization hinges on a fence operation that enforces a strict happens-before relationship \cite{LamportClocks} between the reader’s \texttt{Announce} step and the writer’s \texttt{Scan} phase. This ordering preserves a critical safety invariant:
+\begin{itemize}
+    \item \textbf{Writer-side visibility:} If \texttt{Announce} precedes \texttt{Scan}, the writer is guaranteed to observe the reader’s entry in the announce array. Consequently, the writing thread can safely abort the conflicting reading operation.
+    \item \textbf{Reader-side awareness:} Conversely, if \texttt{Scan} completes before \texttt{Announce}, the reader is guaranteed to observe the writer’s newly installed value (or an even newer version) during its read phase. Since the writer has already finalized its \texttt{Acquire} step, this updated view immediately triggers the corresponding validation or helping logic.
+\end{itemize}
+
+Memory barriers \cite{McKenneyBarriers} ensure that shared variable visibility adheres to our consistency requirements, preventing hardware or compiler reorderings from introducing stale reads. This ``dual-path'' visibility guarantees that no race results in a lost dependency: either the writer observes the reader’s announcement, or the reader encounters the writer’s acquisition. By satisfying this property, the algorithm maintains linearizability while decoupling reads from mandatory global writes, significantly reducing contention in read-heavy workloads.
+
+\end{BLACKSHEET}
