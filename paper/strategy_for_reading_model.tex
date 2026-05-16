@@ -1,4 +1,4 @@
-\subsection{Strategy For Reading Model}
+\subsection{Strategy for a Reading Model}
 \label{sec:strategy_for_reading_model}
 
 Shifting to a "lightweight" reading model requires better strategy for tracking concurrent dependencies. This concept mirrors the Linux kernel's Read-Copy Update (RCU) mechanism \cite{RCULinux}. We adhere to an \textit{announce array}, where each reader thread registers its presence before executing an operation. Every writing operation must inspect this array during the atomic replacement of its cell list, subsequently aborting any reader threads that are operating on nodes within that list. This validation step must occur strictly before the atomic replacement is finalized. Otherwise, a reader thread might complete its execution before the check ends, failing to notice that its operation should have been aborted due to concurrent updates.

@@ -1,55 +1,57 @@
-\begin{thebibliography}{99}
+\newcommand{\doi}[1]{\href{https://doi.org/#1}{doi: \nolinkurl{#1}}}
 
-\bibitem{WaitFreeBST}
-A. Natarajan, L. H. Savoie, and N. Mittal, ``Concurrent wait-free red black trees,'' in \textit{Stabilization, Safety, and Security of Distributed Systems (SSS 2013)}, T. Higashino, Y. Katayama, T. Masuzawa, M. Potop-Butucaru, and M. Yamashita, Eds. Cham, Switzerland: Springer, 2013, pp. 45--60. doi: 10.1007/978-3-319-03089-0\_4.
-
-\bibitem{PracticalMCAS}
-T. L. Harris, K. Fraser, and I. A. Pratt, ``A practical multi-word compare-and-swap operation,'' in \textit{Distributed Computing (DISC 2002)}, D. Malkhi, Ed. Berlin, Heidelberg: Springer, 2002, pp. 265--279. doi: 10.1007/3-540-36108-1\_18.
-
-\bibitem{WaitFreeSync}
-M. Herlihy, ``Wait-free synchronization,'' \textit{ACM Transactions on Programming Languages and Systems}, vol. 13, no. 1, pp. 124--149, Jan. 1991. doi: 10.1145/114005.102808.
-
-\bibitem{STM}
-N. Shavit and D. Touitou, ``Software transactional memory,'' in \textit{Proceedings of the Fourteenth Annual ACM Symposium on Principles of Distributed Computing (PODC '95)}. New York, NY, USA: ACM, 1995, pp. 204--213. doi: 10.1145/224964.224987.
-
-\bibitem{ComposableMT}
-T. Harris, S. Marlow, S. Peyton-Jones, and M. Herlihy, ``Composable memory transactions,'' in \textit{Proceedings of the Tenth ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP '05)}. New York, NY, USA: ACM, 2005, pp. 48--60. doi: 10.1145/1065944.1065952.
-
-\bibitem{NonBlockBST}
-F. Ellen, P. Fatourou, E. Ruppert, and F. van Breugel, ``Non-blocking binary search trees,'' in \textit{Proceedings of the 29th ACM SIGACT-SIGOPS Symposium on Principles of Distributed Computing (PODC '10)}. New York, NY, USA: ACM, 2010, pp. 131--140. doi: 10.1145/1835698.1835736.
-
-\bibitem{LockFreeBST}
-A. Natarajan and N. Mittal, ``Fast concurrent lock-free binary search trees,'' \textit{ACM SIGPLAN Notices}, vol. 49, no. 8, pp. 317--328, Feb. 2014. doi: 10.1145/2692916.2555256.
-
-\bibitem{LockFreeList}
-S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer III, and N. Shavit, ``A lazy concurrent list-based set algorithm,'' in \textit{Principles of Distributed Systems (OPODIS 2005)}, M. K. Aguilera, Ed. Berlin, Heidelberg: Springer, 2005, pp. 3--16. doi: 10.1007/11795490\_3.
+\begin{thebibliography}{18}
 
 \bibitem{TsayLee}
-J. J. Tsay and H. C. Li, ``Lock-free concurrent tree structures for multiprocessor systems (extended abstract),'' in \textit{Proceedings of the 1994 International Conference on Parallel and Distributed Systems}, 1994, pp. 544--549. doi: 10.1109/ICPADS.1994.591244.
+J. J. Tsay and H. C. Li, ``Lock-free concurrent tree structures for multiprocessor systems (extended abstract),'' in \textit{Proceedings of the 1994 International Conference on Parallel and Distributed Systems}, 1994, pp. 544--549. \doi{10.1109/ICPADS.1994.590370}.
 
-\bibitem{EfficientMCAS}
-R. Guerraoui, A. Kogan, V. J. Marathe, and I. Zablotchi, ``Efficient multi-word compare and swap,'' in \textit{Proceedings of the 34th International Symposium on Distributed Computing (DISC 2020)}. Dagstuhl, Germany: Schloss Dagstuhl -- Leibniz-Zentrum für Informatik, 2020, pp. 4:1--4:18. doi: 10.4230/LIPIcs.DISC.2020.4.
+\bibitem{LockFreeBST}
+A. Natarajan and N. Mittal, ``Fast concurrent lock-free binary search trees,'' \textit{ACM SIGPLAN Notices}, vol. 49, no. 8, pp. 317--328, Feb. 2014. \doi{10.1145/2692916.2555256}.
+
+\bibitem{STM}
+N. Shavit and D. Touitou, ``Software transactional memory,'' in \textit{Proceedings of the Fourteenth Annual ACM Symposium on Principles of Distributed Computing (PODC '95)}. New York, NY, USA: ACM, 1995, pp. 204--213. \doi{10.1145/224964.224987}.
 
 \bibitem{LamportTLA}
 L. Lamport, \textit{Specifying Systems: The TLA+ Language and Tools for Hardware and Software Engineers}. Boston, MA, USA: Addison-Wesley, 2002.
+
+\bibitem{EfficientMCAS}
+R. Guerraoui, A. Kogan, V. J. Marathe, and I. Zablotchi, ``Efficient multi-word compare and swap,'' in \textit{Proceedings of the 34th International Symposium on Distributed Computing (DISC 2020)}. Dagstuhl, Germany: Schloss Dagstuhl -- Leibniz-Zentrum für Informatik, 2020, pp. 4:1--4:18. \doi{10.4230/LIPIcs.DISC.2020.4}.
 
 \bibitem{EnnalsLockBased}
 R. Ennals, ``Software transactional memory should not be lock free,'' Intel Research Cambridge, Tech. Rep. IRC-TR-06-052, 2006.
 
 \bibitem{HarrisJavaSTM}
-T. Harris and K. Fraser, ``A dynamic software transactional memory system for Java,'' in \textit{Proceedings of the 18th Annual ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA '03)}, 2003, pp. 322--335. doi: 10.1145/949305.949334.
+T. Harris and K. Fraser, ``Language support for lightweight transactions,'' in \textit{Proceedings of the 18th Annual ACM SIGPLAN Conference on Object-Oriented Programming, Systems, Languages, and Applications (OOPSLA '03)}, 2003, pp. 322--335. \doi{10.1145/949305.949340}.
+
+\bibitem{WaitFreeSync}
+M. Herlihy, ``Wait-free synchronization,'' \textit{ACM Transactions on Programming Languages and Systems}, vol. 13, no. 1, pp. 124--149, Jan. 1991. \doi{10.1145/114005.102808}.
+
+\bibitem{ComposableMT}
+T. Harris, S. Marlow, S. Peyton-Jones, and M. Herlihy, ``Composable memory transactions,'' in \textit{Proceedings of the Tenth ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP '05)}. New York, NY, USA: ACM, 2005, pp. 48--60. \doi{10.1145/1065944.1065952}.
+
+\bibitem{LockFreeList}
+S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer III, and N. Shavit, ``A lazy concurrent list-based set algorithm,'' in \textit{Principles of Distributed Systems (OPODIS 2005)}, M. K. Aguilera, Ed. Berlin, Heidelberg: Springer, 2005, pp. 3--16. \doi{10.1007/11795490_3}.
 
 \bibitem{SitesDECAlpha}
-R. L. Sites and E. McLellan, ``The Alpha AXP Architecture and 21064 Processor,'' \textit{IEEE Micro}, vol. 12, no. 6, pp. 10--11, Dec. 1992. doi: 10.1109/40.180237.
+R. L. Sites and E. McLellan, ``The Alpha AXP Architecture and 21064 Processor,'' \textit{IEEE Micro}, vol. 12, no. 6, pp. 10--11, Dec. 1992. \doi{10.1109/40.216747}.
+
+\bibitem{WaitFreeBST}
+A. Natarajan, L. H. Savoie, and N. Mittal, ``Concurrent wait-free red black trees,'' in \textit{Stabilization, Safety, and Security of Distributed Systems (SSS 2013)}, T. Higashino, Y. Katayama, T. Masuzawa, M. Potop-Butucaru, and M. Yamashita, Eds. Cham, Switzerland: Springer, 2013, pp. 45--60. \doi{10.1007/978-3-319-03089-0_4}.
+
+\bibitem{NonBlockBST}
+F. Ellen, P. Fatourou, E. Ruppert, and F. van Breugel, ``Non-blocking binary search trees,'' in \textit{Proceedings of the 29th ACM SIGACT-SIGOPS Symposium on Principles of Distributed Computing (PODC '10)}. New York, NY, USA: ACM, 2010, pp. 131--140. \doi{10.1145/1835698.1835736}.
 
 \bibitem{Linearizability}
-M. Herlihy and J. M. Wing, ``Linearizability: A correctness condition for concurrent objects,'' \textit{ACM Transactions on Programming Languages and Systems}, vol. 12, no. 3, pp. 463--492, Jul. 1990. doi: 10.1145/78969.78972.
+M. Herlihy and J. M. Wing, ``Linearizability: A correctness condition for concurrent objects,'' \textit{ACM Transactions on Programming Languages and Systems}, vol. 12, no. 3, pp. 463--492, Jul. 1990. \doi{10.1145/78969.78972}.
+
+\bibitem{PracticalMCAS}
+T. L. Harris, K. Fraser, and I. A. Pratt, ``A practical multi-word compare-and-swap operation,'' in \textit{Distributed Computing (DISC 2002)}, D. Malkhi, Ed. Berlin, Heidelberg: Springer, 2002, pp. 265--279. \doi{10.1007/3-540-36108-1_18}.
 
 \bibitem{RCULinux}
-P. E. McKenney and J. Slingwine, ``Read-Copy Update: Using Execution History to Solve Concurrency Problems,'' in \textit{Proceedings of the 11th International Parallel and Distributed Processing Symposium (IPDPS)}, 1998, pp. 509--518. doi: 10.1109/IPPS.1998.672890.
+P. E. McKenney and J. Slingwine, ``Read-Copy Update: Using Execution History to Solve Concurrency Problems,'' in \textit{Proceedings of the 11th International Parallel and Distributed Processing Symposium (IPDPS)}, 1998, pp. 509--518.
 
 \bibitem{LamportClocks}
-L. Lamport, ``Time, clocks, and the ordering of events in a distributed system,'' \textit{Communications of the ACM}, vol. 21, no. 7, pp. 558--565, Jul. 1978. doi: 10.1145/359545.359563.
+L. Lamport, ``Time, clocks, and the ordering of events in a distributed system,'' \textit{Communications of the ACM}, vol. 21, no. 7, pp. 558--565, Jul. 1978. \doi{10.1145/359545.359563}.
 
 \bibitem{McKenneyBarriers}
 P. E. McKenney, ``Memory barriers: a hardware view for software hackers,'' Linux Technology Center, IBM Beaverton, Tech. Rep., 2010.
