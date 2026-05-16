@@ -5,7 +5,7 @@ MAIN      := main
 TARGET    := paper.pdf
 
 SRC_TEX   := abstract.tex introduction.tex related_works.tex \
-             advanced_tsay_lee_framework.tex adaptation_to_transactional_memory.tex \
+             advanced_tsay_li_framework.tex adaptation_to_transactional_memory.tex \
              strategy_for_reading_model.tex formal_methodology.tex \
              evaluation.tex conclusion.tex bibliography.tex
 

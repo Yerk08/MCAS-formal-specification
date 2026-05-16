@@ -1,0 +1,34 @@
+\usetikzlibrary{positioning, backgrounds, fit, matrix}
+
+\begin{frame}[fragile]{Tsay-Li Framework}
+
+\begin{columns}[t]
+    \begin{column}{0.45\textwidth}
+        \centering
+        \input{tsay_li_tree_animation.tex}
+
+        \small \textit{Frame structures always overlap}
+    \end{column}
+
+    \begin{column}{0.5\textwidth}
+        The framework ensures lock-freedom, based on a top-down traversal. It performs frame updates from a changed local copy
+
+        \vspace{0.1cm} \pause
+
+        Natarajan et. al. modified this approach, subdivided nodes into vertices($\bigcirc$) and subtrees(\tikz\draw[line width=0.6pt] (0,0) rectangle (0.3,0.15);) \footnotemark
+
+        \vspace{0.1cm} \pause
+
+        A thread may drop out of the tree if a concurrent CAS operation is performed upstream.
+
+        \pause
+
+        Therefore, we need to utilize descriptors.
+
+    \end{column}
+\end{columns}
+
+\vskip 0.1cm
+\footnotetext{Natarajan et al. ``Concurrent wait-free red black trees.''}
+
+\end{frame}

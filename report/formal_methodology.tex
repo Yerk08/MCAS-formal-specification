@@ -1,0 +1,40 @@
+\begin{frame}{Formal Methodology \& Linearizability Property}
+    \begin{itemize}
+        \item \textbf{Variables} \texttt{nodeValue} \& \texttt{nodeDesc} track memory; \texttt{absNodeValue} is refinement mapping to ideal atomic memory
+
+        \item \textbf{Space Boundary} restricted to \texttt{successCount <= 3}
+
+        \item \textbf{Liveness} is defined via property similar to TreeCAS module:
+    \end{itemize}
+
+    \begin{equation*}
+    \begin{aligned}
+GlobalProgress \triangleq & \ (\exists d \in WDescs : descState[d] = \text{``ACTIVE''}) \leadsto \\
+                    & \ (\exists u \in WDescs : descState[u] = \text{``SUCCESS''}) \\
+                    & \ \lor \neg StructConstraint
+    \end{aligned}
+    \end{equation*}
+
+\end{frame}
+
+
+\begin{frame}{Safety Invariants}
+    \begin{itemize}
+        \item \textbf{AtomicityInvariant} synchronizes physical and abstract states. If a cell is free, its value must match the abstract state. If owned by a descriptor, its value depends on the transaction phase
+
+        \item \textbf{ReaderAtomicity} ensures snapshot consistency
+    \end{itemize}
+
+    \begin{equation*}
+    \begin{aligned}
+    & ReaderAtomicy \triangleq \ \forall r \in RDescriptors : (rDescState[r] = \text{``READING''}) \\
+    & \implies \forall n \in rDescFrame[r] : \\
+    & \quad \lor rDescView[r][n] = absNodeValue[n] \\
+    & \quad \lor \exists d \in WDescriptors : \\
+    & \quad \quad \quad \land wDescState[d] = \text{``SUCCESS''} \\
+    & \quad \quad \quad \land n \in wDescFrame[d] \\
+    & \quad \quad \quad \land rDescView[r][n] = wDescOldValue[d][n]
+    \end{aligned}
+    \end{equation*}
+
+\end{frame}

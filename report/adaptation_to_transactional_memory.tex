@@ -1,0 +1,21 @@
+\begin{frame}{Adaptation}
+
+To transition from trees to flat sets, values must be moved from nodes directly into descriptors. It should consider three phases:
+
+\begin{itemize}
+    \item \textbf{Acquire:} Thread installs its descriptor $D$ into target cells $R_j$ via CAS in ascending address order (prevents deadlocks). If blocked by descriptor $U$, the thread helps $U$ finish first.
+
+    \pause
+
+    \item \textbf{Decision (Linearization Point):} Once all cells are acquired, the thread atomically changes descriptor status via CAS from \textit{Undecided} to \textit{Committed} or \textit{Aborted}.
+
+    \pause
+
+    \item \textbf{Release:} Thread resets cell states to concrete values. Updates to $new_j$ if \textit{Committed}, or reverts to $old_j$ if \textit{Aborted}, exposing the changes to the system.
+\end{itemize}
+
+\pause
+
+Since the specification draws no difference between threads and their descriptors, all updates occur concurrently.
+
+\end{frame}

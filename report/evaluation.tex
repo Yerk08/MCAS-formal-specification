@@ -1,0 +1,15 @@
+\begin{frame}{Evaluation}
+
+\begin{itemize}
+    \item \textbf{Configuration:} 2 writing threads, 1 reading thread, and a 2-cell memory pool.
+
+    \item \textbf{State Space Constraint:} Increasing the number of threads causes an exponential state-space explosion.
+
+    \pause
+
+    \item \textbf{Sufficiency:} 2 concurrent threads are sufficient because all method phases overlap pairwise. A 3rd thread adds no new interleaving patterns, only duplicating existing overlapping scenarios.
+
+    \item \textbf{Memory Pool:} A 2-cell memory pool is enough to verify how the framework handles overlapping frame sections.
+\end{itemize}
+
+\end{frame}

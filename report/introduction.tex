@@ -1,0 +1,17 @@
+\begin{frame}{Introduction}
+
+There is the connection between the Tsai-Li framework \footnote{J. J. Tsay and H. C. Li, ``Lock-free concurrent tree structures for multiprocessor systems (extended abstract).''} and Software Transactional Memory (STM) mechanisms
+
+\pause
+
+First, both use Multiple Compare-And-Swap, where
+\begin{align*}
+\text{CAS}(value, old, new) \triangleq & \lor (value = old \land value' = new) \\
+                                       & \lor (value \neq old \land value' = value) \text{ atomically}
+\end{align*}
+
+\pause
+
+Second, we can establish this connection by utilizing TLA+ as a specification tool. For instance, the model can be verified using the TLC model checker
+
+\end{frame}
