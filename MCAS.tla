@@ -328,4 +328,23 @@ GlobalProgress ==
     \E d \in WDescriptors : wDescState[d] = "ACTIVE" ~>
         \E u \in WDescriptors : wDescState[u] = "SUCCESS" \/ ~countConstraint
 
+(* To be honest, the above is not a mathematically rigorous guarantee of lock-freedom. *)
+(* The reason is that currently, due to how the Spec is written (heavy use of Weak     *)
+(* Fairness), the GlobalProgress condition will hold even without the help operation   *)
+(* where other threads cooperate to clear the way for their own progress. To fix this  *)
+(* situation, one must remove all WF conditions associated with the writer thread (and *)
+(* specifically the writer, reader conditions should remain) and move them to the top  *)
+(* level of the property as follows:                                                   *)
+(*                                                                                     *)
+(*  (\E d \in WDescriptors : wDescState[d] = "ACTIVE" =>                               *)
+(*      \A n \in {x \in Nodes : x \in wDescFrame[d]} :                                 *)
+(*          \/ WF_vars(AcquireNode(d, n))                                              *)
+(*          ...                                                                        *)
+(*          \/ WF_vars(ReleaseNode(d, n))                                              *)
+(*  ) ~> \E u \in WDescriptors : wDescState[u] = "SUCCESS" \/ ~countConstraint         *)
+(*                                                                                     *)
+(* This is true because we guarantee the progress of our descriptor and no other, what *)
+(* implies that either it will terminate or we will hit the limit. However, this       *)
+(* heavily complicates the understanding of the property; The old statement was kept.  *)
+
 =========================================================================================

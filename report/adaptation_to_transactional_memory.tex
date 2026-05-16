@@ -19,3 +19,18 @@ To transition from trees to flat sets, values must be moved from nodes directly 
 Since the specification draws no difference between threads and their descriptors, all updates occur concurrently.
 
 \end{frame}
+
+
+\begin{frame}{Algorithm Specifications}
+
+State variables:
+
+\begin{itemize}
+    \item \texttt{wDescState} Descriptor status (\textit{IDLE, ACTIVE, SCANNING, SUCCESS, ABORTED}).
+    \item \texttt{wDescPending} Cells awaiting locking or physical update.
+    \item \texttt{wDescFrame} Keys (cells) acquired by the transaction.
+    \item \texttt{wDescOldValue} Snapshot of original cell values ($old_j$).
+    \item \texttt{wDescNewValue} Snapshot of target cell values ($new_j$).
+\end{itemize}
+
+\end{frame}
