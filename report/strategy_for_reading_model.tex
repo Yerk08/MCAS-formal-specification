@@ -5,4 +5,8 @@
 
 \textit{Strategy for linearization point}
 
+\note{Here we see two main behaviors of this system. In the first case, the writing thread aborts the read operation since it changed the state. We don't care about the specific implementation; what matters is that it can be done efficiently using CAS}
+
+\note{In the second scenario, the writer is late, shifting linearizability careness to the reader. Thus, reading before the \texttt{Decision} phase yields the old value; otherwise, it returns the new one, as if already updated in memory}
+
 \end{frame}

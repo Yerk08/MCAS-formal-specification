@@ -13,9 +13,13 @@
     \begin{column}{0.5\textwidth}
         The framework ensures lock-freedom, based on a top-down traversal. It performs frame updates from a changed local copy
 
+        \note{All operations modifying the frame copy it locally before executing a full state update. This approach is poorly suited for CAS, as it requires the simultaneous modification of multiple variables}
+
         \vspace{0.1cm} \pause
 
         Natarajan et. al. modified this approach, subdivided nodes into vertices($\bigcirc$) and subtrees(\tikz\draw[line width=0.6pt] (0,0) rectangle (0.3,0.15);) \footnotemark
+
+        \note{They adapted the framework for modern processors by decoupling vertices and edges into two distinct entities. Therefore, it is now possible to update only the root, effectively discarding the previous frame's state from history}
 
         \vspace{0.1cm} \pause
 
@@ -24,6 +28,8 @@
         \pause
 
         Therefore, we need to utilize descriptors and helping approach.
+
+        \note{To address this, they proposed employing descriptors to store comprehensive operation metadata. I wrote specification for verify correctness and lock-freedom of this framework. This spec will be used later for build Multiple CAS as a generalized algorithm, based on previous specification.}
 
     \end{column}
 \end{columns}

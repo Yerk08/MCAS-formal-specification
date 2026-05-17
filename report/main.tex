@@ -4,6 +4,10 @@
 \usepackage{tikz}
 \usepackage{adjustbox}
 
+\ifdefined\NOTES
+    \setbeameroption{show only notes}
+\fi
+
 \usetheme{metropolis}
 \title{Using TLA+ as a Tool for Building Transactional Memory Models from Specialized Frameworks}
 \date{\today}

@@ -5,11 +5,15 @@
 
     \item \textbf{State Space Constraint:} Increasing the number of threads causes an exponential state-space explosion.
 
+    \note{Here is why I find this configuration sufficient. While more broader configurations also work, these are the ones currently set in the module configs}
+
     \pause
 
     \item \textbf{Sufficiency:} 2 concurrent threads are sufficient because all method phases overlap pairwise. A 3rd thread adds no new interleaving patterns, only duplicating existing overlapping scenarios.
 
     \item \textbf{Memory Pool:} A 2-cell memory pool is enough to verify how the framework handles overlapping frame sections.
+
+    \note{Consider an analogy with segmented geometric rays: we only need to check if any two sections intersect, ignoring how many intersections occur elsewhere}
 \end{itemize}
 
 \end{frame}

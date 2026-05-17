@@ -15,7 +15,12 @@ $(TARGET): $(MAIN).tex $(SRC_TEX)
 	$(LATEX) $(MAIN).tex
 	mv $(MAIN).pdf $(TARGET)
 
+_notes.pdf: $(MAIN).tex $(SRC_TEX)
+	$(LATEX) "\def\NOTES{} \input{$(MAIN).tex}"
+	$(LATEX) "\def\NOTES{} \input{$(MAIN).tex}"
+	mv $(MAIN).pdf _notes.pdf
+
 clean:
 	rm -f *.aux *.dvi *.log *.out *.toc *.old *.new *.snm *.nav *.vrb $(MAIN).pdf tlatex.tex
 
-.PHONY: all clean FORCE
+.PHONY: all clean

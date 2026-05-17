@@ -2,6 +2,8 @@
 
 There is a connection between the Tsai-Li framework \footnote{J. J. Tsay and H. C. Li, ``Lock-free concurrent tree structures for multiprocessor systems (extended abstract).''} and Software Transactional Memory (STM) mechanisms
 
+\note{The first framework introduces the behavior of concurrent binary search trees, while the second stands on a generalized approach to executing transactions as inter-process communication mechanisms in shared memory. Their connection lies in their shared ability to deliver non-blocking properties to complex systems}
+
 \pause
 
 First, both use Multiple Compare-And-Swap, where
@@ -10,8 +12,12 @@ First, both use Multiple Compare-And-Swap, where
                                        & \lor (value \neq old \land value' = value) \text{ atomically}
 \end{align*}
 
+\note{CAS instruction atomically replaces one value with another. Although restricted to a single memory location, its consensus number is infinite, meaning it can be utilized to implement any non-blocking interaction}
+
 \pause
 
 Second, we can establish this connection by utilizing TLA+ as a specification tool. For instance, the model can be verified using the TLC model checker
+
+\note{This tool specifies the Temporal Logic of Actions, enabling the definition of relations between the system's previous and next states. A specification within this framework consists of an initial state and a next-state predicate}
 
 \end{frame}

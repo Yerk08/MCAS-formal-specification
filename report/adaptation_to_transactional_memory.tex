@@ -5,6 +5,8 @@ To transition from trees to flat sets, values must be moved from nodes directly 
 \begin{itemize}
     \item \textbf{Acquire:} Thread installs its descriptor $D$ into target cells $R_j$ via CAS in ascending address order (prevents deadlocks). If blocked by descriptor $U$, the thread helps $U$ finish first.
 
+    \note{Modifying a frame now required marking all participating vertices via CAS, executing an atomic CAS replacement, and subsequently releasing them for subsequent operations}
+
     \pause
 
     \item \textbf{Decision (Linearization Point):} Once all cells are acquired, the thread atomically changes descriptor status via CAS from \textit{Undecided} to \textit{Committed} or \textit{Aborted}.
@@ -17,6 +19,8 @@ To transition from trees to flat sets, values must be moved from nodes directly 
 \pause
 
 Since the specification draws no difference between threads and their descriptors, all updates occur concurrently.
+
+\note{This means that it is built upon operations whose unique sequence strictly determines from the state of the descriptor}
 
 \end{frame}
 
@@ -32,5 +36,9 @@ State variables:
     \item \texttt{wDescOldValue} Snapshot of original cell values ($old_j$).
     \item \texttt{wDescNewValue} Snapshot of target cell values ($new_j$).
 \end{itemize}
+
+\note{The specification uses the following temporal variables that change over time based on the \texttt{Next} predicate. This predicate is built from a set of conditions that refine the behavior of phases, whose described on previous slide}
+
+\note{Executing operations requires helping other threads, which degrades read-only transaction performance. Therefore, readers simply announce their presence, and writers track these announcements}
 
 \end{frame}
