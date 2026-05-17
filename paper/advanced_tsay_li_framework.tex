@@ -30,7 +30,7 @@ Help(d, n) == LET otherD == nodeDesc[n] IN
   /\ nodeDesc[n] /= d    (* locked by a different descriptor otherD *)
   /\ IF descState[otherD] \in {"ACTIVE", "COMMITTING"}
      THEN (* If the competitor is in progress *)
-        CommitStep(otherD)
+        CommitStep(otherD) (* then make the next step *)
      ELSE IF descState[otherD] \in {"SUCCESS", "ABORTED"}
      THEN (* Help it unlock nodes and free memory *)
         ReleaseDescriptor(otherD)
@@ -73,6 +73,10 @@ Help(d, n) == LET otherD == nodeDesc[n] IN
 }%
 \@xx{}%
 \@x{\@s{20.5} CommitStep ( otherD )}%
+\@y{%
+  then make the next step 
+}%
+\@xx{}%
  \@x{\@s{8.2} \.{\ELSE} {\IF} descState [ otherD ] \.{\in} \{\@w{SUCCESS}
  ,\,\@w{ABORTED} \}}%
 \@x{\@s{8.2} \.{\THEN}}%
@@ -116,10 +120,8 @@ Another aspect of the specification is the CAS acquisition phase. If the linked 
     /\ descState' = [descState EXCEPT ![d] = "ABORTED"]
     /\ UNCHANGED vars \ {...}
   ELSE IF nodeDesc[n] = NULL
-  THEN (* CAS SUCCESS: Lock the node *)
-    ExecuteAcquire(d, n)
-  ELSE (* CAS FAIL: Node is occupied *)
-    UNCHANGED vars
+  THEN ExecuteAcquire(d, n) (* CAS SUCCESS: Lock the node *)
+  ELSE UNCHANGED vars (* CAS FAIL: Node is occupied *)
 \end{tla}
 \begin{tlatex}
  \@x{ \.{\land} {\IF} nodeStruct [ n ] \.{\neq} descExpectedStruct [ d ] [ n
@@ -138,16 +140,16 @@ Another aspect of the specification is the CAS acquisition phase. If the linked 
  d ] \.{=}\@w{ABORTED} ]}%
 \@x{\@s{16.4} \.{\land} {\UNCHANGED} vars \.{\,\backslash\,} \{ \.{\dots} \}}%
 \@x{\@s{8.2} \.{\ELSE} {\IF} nodeDesc [ n ] \.{=} NULL}%
-\@x{\@s{8.2} \.{\THEN}}%
+\@x{\@s{8.2} \.{\THEN} ExecuteAcquire ( d ,\, n )}%
 \@y{%
   CAS SUCCESS: Lock the node 
 }%
 \@xx{}%
-\@x{\@s{16.4} ExecuteAcquire ( d ,\, n )}%
-\@x{\@s{8.2} \.{\ELSE}}%
+\@x{\@s{8.2} \.{\ELSE} {\UNCHANGED} vars}%
 \@y{%
   CAS FAIL: Node is occupied 
 }%
 \@xx{}%
-\@x{\@s{16.4} {\UNCHANGED} vars}%
 \end{tlatex}
+
+Next, we can examine the step by step committing phase. It preserves the structural consistency invariant because accessing any modified node requires interacting with the operation descriptor, enforcing participation in the next commit step and maintaining consistency.
