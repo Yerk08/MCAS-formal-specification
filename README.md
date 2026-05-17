@@ -27,8 +27,8 @@ java -cp tla2tools.jar tlc2.TLC TreeCAS.tla
 Use all available CPU cores to speed up the check:
 
 ```bash
-java -cp tla2tools.jar tlc2.TLC -workers auto MCAS.tla
-java -cp tla2tools.jar tlc2.TLC -workers auto TreeCAS.tla
+java -XX:+UseParallelGC -cp tla2tools.jar tlc2.TLC -workers 8 MCAS.tla
+java -XX:+UseParallelGC -cp tla2tools.jar tlc2.TLC -workers 8 TreeCAS.tla
 ```
 
 ## Expected Output

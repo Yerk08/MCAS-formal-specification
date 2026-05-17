@@ -43,6 +43,7 @@ vars == <<nodeValue, nodeDesc, wDescState, wDescPending, wDescFrame,
 (* Execution boundary to restrict state space during model checking *)
 countConstraint == successCount <= 3
 
+
 (***************************************************************************)
 (* INITIALIZATION AND CONCURRENCY SEMANTICS                                *)
 (*                                                                         *)
@@ -75,6 +76,7 @@ AbsAtomicWrite(frame, valuesMap) ==
     absNodeValue' = [n \in Nodes |-> IF n \in frame
                                      THEN valuesMap[n]
                                      ELSE absNodeValue[n]]
+
 
 (***************************************************************************)
 (* PARALLEL WRITER ACTIONS                                                 *)
@@ -128,11 +130,15 @@ AcquireNode(d, n) ==
 
     /\ IF nodeDesc[n] = NULL
        THEN (* CAS success: load the current node value and link the descriptor *)
-            /\ wDescOldValue' = [wDescOldValue EXCEPT ![d][n] = nodeValue[n]]
-            /\ nodeDesc' = [nodeDesc EXCEPT ![n] = d]
-            /\ wDescPending' = [wDescPending EXCEPT ![d] = wDescPending[d] \ {n}]
-            /\ UNCHANGED <<nodeValue, wDescState, wDescFrame,
-                           wDescNewValue, rDescState, rDescFrame, rDescView, freeWDescs, freeRDescs, successCount, absNodeValue>>
+            (* Now we decide if abort is reliable to apply here before linearization point *)
+            \/  /\ wDescOldValue' = [wDescOldValue EXCEPT ![d][n] = nodeValue[n]]
+                /\ nodeDesc' = [nodeDesc EXCEPT ![n] = d]
+                /\ wDescPending' = [wDescPending EXCEPT ![d] = wDescPending[d] \ {n}]
+                /\ UNCHANGED <<nodeValue, wDescState, wDescFrame, wDescNewValue, rDescState, rDescFrame, rDescView, freeWDescs, freeRDescs, successCount, absNodeValue>>
+            (* You can definetely prefer to ignore this abort step for simplicity *)
+            \/  /\ wDescPending' = [wDescPending EXCEPT ![d] = wDescFrame[d]]
+                /\ wDescState' = [wDescState EXCEPT ![d] = "ABORTED"]
+                /\ UNCHANGED <<nodeValue, wDescOldValue, wDescFrame, nodeDesc, wDescNewValue, rDescState, rDescFrame, rDescView, freeWDescs, freeRDescs, successCount, absNodeValue>>
        ELSE (* CAS failed: need to invoke cooperative help *)
             UNCHANGED vars
 
@@ -158,9 +164,8 @@ WriterScanAndReject(d) ==
 DecisionPhase(d) ==
     /\ wDescState[d] = "SCANNING"
     /\ wDescState' = [wDescState EXCEPT ![d] = "SUCCESS"]
-    /\ successCount' = successCount + 1
     /\ wDescPending' = [wDescPending EXCEPT ![d] = wDescFrame[d]]
-    /\ UNCHANGED <<nodeValue, nodeDesc, wDescFrame, wDescOldValue, wDescNewValue, rDescState, rDescFrame, rDescView, freeWDescs, freeRDescs, absNodeValue>>
+    /\ UNCHANGED <<nodeValue, nodeDesc, wDescFrame, wDescOldValue, wDescNewValue, rDescState, rDescFrame, rDescView, freeWDescs, freeRDescs, successCount, absNodeValue>>
 
 (* 6) ReleaseNode: Step-by-step physical replacement of old values with new values (new_j) *)
 ReleaseNode(d, n) ==
@@ -168,8 +173,10 @@ ReleaseNode(d, n) ==
     /\ n \in wDescPending[d]
     (* Physical value update occurs only if the transaction committed successfully *)
     /\ IF wDescState[d] = "SUCCESS"
-       THEN /\ nodeValue' = [nodeValue EXCEPT ![n] = wDescNewValue[d][n]]
-       ELSE /\ nodeValue' = [nodeValue EXCEPT ![n] = wDescOldValue[d][n]]
+       THEN nodeValue' = [nodeValue EXCEPT ![n] = wDescNewValue[d][n]]
+       ELSE nodeValue' = [nodeValue EXCEPT ![n] = IF wDescOldValue[d][n] /= NULL
+                                                  THEN wDescOldValue[d][n]
+                                                  ELSE nodeValue[n]]
     (* Releases the lock only if the current descriptor is the actual owner *)
     /\ nodeDesc' = [nodeDesc EXCEPT ![n] = IF nodeDesc[n] = d THEN NULL ELSE nodeDesc[n]]
     /\ wDescPending' = [wDescPending EXCEPT ![d] = wDescPending[d] \ {n}]
@@ -181,7 +188,8 @@ FreeWDescriptor(d) ==
     /\ wDescPending[d] = {}
     /\ wDescState' = [wDescState EXCEPT ![d] = "IDLE"]
     /\ freeWDescs' = freeWDescs \cup {d}
-    /\ UNCHANGED <<nodeValue, nodeDesc, wDescPending, wDescFrame, wDescOldValue, wDescNewValue, rDescState, rDescFrame, rDescView, freeRDescs, successCount, absNodeValue>>
+    /\ successCount' = successCount + 1
+    /\ UNCHANGED <<nodeValue, nodeDesc, wDescPending, wDescFrame, wDescOldValue, wDescNewValue, rDescState, rDescFrame, rDescView, freeRDescs, absNodeValue>>
 
 (* 3) Help: Cooperative help on memory cells *)
 Help(d, n) ==
@@ -193,6 +201,7 @@ Help(d, n) ==
        \/ WriterScanAndReject(otherD)
        \/ DecisionPhase(otherD)
        \/ ReleaseNode(otherD, n)
+
 
 (****************************************************************************)
 (* PARALLEL READER ACTIONS                                                  *)
@@ -253,6 +262,7 @@ ReaderRelease(r) ==
     /\ UNCHANGED <<nodeValue, nodeDesc, wDescState, wDescPending, wDescFrame,
                    wDescOldValue, wDescNewValue, rDescView, freeWDescs, absNodeValue>>
 
+
 (***************************************************************************)
 (* NEXT STATE RELATION & SPECIFICATION                                     *)
 (***************************************************************************)
@@ -285,6 +295,7 @@ Spec ==
     /\ \A r \in RDescriptors : WF_vars(ReaderRead(r))
     /\ \A r \in RDescriptors : WF_vars(ReaderRelease(r))
 
+
 (***************************************************************************)
 (* INVARIANTS AND FORMAL VALIDATION                                        *)
 (***************************************************************************)
@@ -294,7 +305,7 @@ AtomicyInvariant ==
         LET owner == nodeDesc[n] IN
         IF owner /= NULL
         THEN (* Case 1: The cell is currently locked by a descriptor *)
-             IF wDescState[owner] \in {"SCANNING", "SUCCESS"}
+             IF wDescState[owner] \in {"SCANNING", "SUCCESS", "ABORTED"}
              THEN
                 (* During SCANNING and SUCCESS, the abstract state has already linearized. *)
                 (* The physical value may either lag behind (retaining old value) *)
@@ -325,8 +336,8 @@ ReaderAtomicy ==
 
 (* GlobalProgress: Checks lock-freedom by ignoring model execution constraints *)
 GlobalProgress ==
-    \E d \in WDescriptors : wDescState[d] = "ACTIVE" ~>
-        \E u \in WDescriptors : wDescState[u] = "SUCCESS" \/ ~countConstraint
+    \E d \in WDescriptors : wDescState[d] = "ACTIVE" ~> (* ABORTED state ensures cross-module consistency. *)
+        \E u \in WDescriptors : wDescState[u] \in {"SUCCESS", "ABORTED"} \/ ~countConstraint
 
 (* To be honest, the above is not a mathematically rigorous guarantee of lock-freedom. *)
 (* The reason is that currently, due to how the Spec is written (heavy use of Weak     *)

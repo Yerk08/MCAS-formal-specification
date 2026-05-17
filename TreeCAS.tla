@@ -31,9 +31,10 @@ FreeStructConstraint == freeStruct <= 6
 vars == <<nodeStruct, nodeDesc, structLinks, descState, descPending, 
           descFrame, descExpectedStruct, descNewStruct, freeDescs, freeStruct>>
 
-(*************************************)
-(* DYNAMIC GRAPH GEOMETRY            *)
-(*************************************)
+
+(*************************************************)
+(* DYNAMIC GRAPH GEOMETRY                        *)
+(*************************************************)
 (* Checks if the struct of the parent node points to the child node *)
 IsEdge(parent, child) == child \in structLinks[nodeStruct[parent]]
 
@@ -59,6 +60,7 @@ IsValidFrame(f) ==
         /\ \A n \in f :
             (* n must be reachable from r exclusively through the nodes of this same frame *)
             n = r \/ n \in ReachableFrom(r)
+
 
 (***************************************************************************)
 (* INITIALIZATION                                                          *)
@@ -87,9 +89,9 @@ Init ==
     (* We will allocate the required ones if we want to start an operation *)
     /\ freeDescs = Descriptors
 
-(*************************)
-(* HELPER ACTIONS        *)
-(*************************)
+(*************************************************)
+(* HELPER ACTIONS                                *)
+(*************************************************)
 ExecuteAcquire(d, n) ==
     (* We will need an operator that marks nodes with our descriptor *)
     /\ nodeDesc' = [nodeDesc EXCEPT ![n] = d]
@@ -107,9 +109,10 @@ StartCommit(d) ==
     /\ UNCHANGED <<nodeStruct, nodeDesc, structLinks, descFrame, 
                    descExpectedStruct, descNewStruct, freeDescs, freeStruct>>
 
-(***************************************)
-(* MAIN EVENTS (SYSTEM STEPS)          *)
-(***************************************)
+
+(*************************************************)
+(* MAIN EVENTS (SYSTEM STEPS)                    *)
+(*************************************************)
 
 (* 1) Create descriptor, pre-allocating new structs by excessively copying old ones *)
 CreateDescriptor(d, frame, linksMap) ==
@@ -187,8 +190,7 @@ CommitStep(d) ==
                 /\ descPending' = [descPending EXCEPT ![d] = descPending[d] \ {n}]
                 /\ UNCHANGED <<nodeDesc, descState, structLinks, descFrame, descExpectedStruct, descNewStruct, freeDescs, freeStruct>>
        ELSE IF descState[d] = "COMMITTING" /\ descPending[d] = {}
-       THEN 
-            (* All node redirects are complete and visible to the graph. *)
+       THEN (* All node redirects are complete and visible to the graph. *)
             /\ descState' = [descState EXCEPT ![d] = "SUCCESS"]
             /\ UNCHANGED <<nodeStruct, nodeDesc, structLinks, descPending, descFrame, descExpectedStruct, descNewStruct, freeDescs, freeStruct>>
        ELSE UNCHANGED vars
@@ -222,6 +224,7 @@ Help(d, n) ==
        ELSE (* If otherD is IDLE, do nothing *)
             UNCHANGED vars
 
+
 (****************************************************)
 (* INVARIANTS AND PROPERTIES FOR VERIFICATION       *)
 (****************************************************)
@@ -247,6 +250,7 @@ OperationTerminates ==
 GlobalProgress ==
     \E d \in Descriptors : descState[d] = "ACTIVE" ~>
         \E u \in Descriptors : descState[u] = "SUCCESS" \/ ~FreeStructConstraint
+
 
 (*******************************************)
 (* NEXT STATE RELATION & SPECIFICATION     *)
