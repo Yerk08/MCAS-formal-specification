@@ -11,7 +11,7 @@
     \begin{aligned}
 GlobalProgress \triangleq & \ (\exists d \in WDescs : descState[d] = \text{``ACTIVE''}) \leadsto \\
                     & \ (\exists u \in WDescs : descState[u] = \text{``SUCCESS''}) \\
-                    & \ \lor \neg StructConstraint
+                    & \ \lor \neg countConstraint
     \end{aligned}
     \end{equation*}
 
@@ -29,11 +29,7 @@ GlobalProgress \triangleq & \ (\exists d \in WDescs : descState[d] = \text{``ACT
     \begin{aligned}
     & ReaderAtomicy \triangleq \ \forall r \in RDescriptors : (rDescState[r] = \text{``READING''}) \\
     & \implies \forall n \in rDescFrame[r] : \\
-    & \quad \lor rDescView[r][n] = absNodeValue[n] \\
-    & \quad \lor \exists d \in WDescriptors : \\
-    & \quad \quad \quad \land wDescState[d] = \text{``SUCCESS''} \\
-    & \quad \quad \quad \land n \in wDescFrame[d] \\
-    & \quad \quad \quad \land rDescView[r][n] = wDescOldValue[d][n]
+    & \quad rDescView[r][n] = absNodeValue[n]
     \end{aligned}
     \end{equation*}
 

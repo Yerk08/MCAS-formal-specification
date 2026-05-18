@@ -6,7 +6,7 @@ There is a connection between the Tsai-Li framework \footnote{J. J. Tsay and H. 
 
 \pause
 
-First, both use Multiple Compare-And-Swap, where
+First, both use Multiple Compare-And-Swap (or analogy), where
 \begin{align*}
 \text{CAS}(value, old, new) \triangleq & \lor (value = old \land value' = new) \\
                                        & \lor (value \neq old \land value' = value) \text{ atomically}

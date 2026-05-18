@@ -325,14 +325,8 @@ ReaderAtomicy ==
         (* and transitions to READING *)
         (rDescState[r] = "READING") =>
             \A n \in rDescFrame[r] :
-                (* Linearizability property: the observed value must match  *)
-                (* either the current abstract state or an older historical *)
-                (* value captured prior to a committed concurrent write.    *)
-                \/ rDescView[r][n] = absNodeValue[n]
-                \/ \E d \in WDescriptors :
-                      /\ wDescState[d] = "SUCCESS"
-                      /\ n \in wDescFrame[d]
-                      /\ rDescView[r][n] = wDescOldValue[d][n]
+                (* Linearizability property: the observed value must match the current abstract state. *)
+                rDescView[r][n] = absNodeValue[n]
 
 (* GlobalProgress: Checks lock-freedom by ignoring model execution constraints *)
 GlobalProgress ==
